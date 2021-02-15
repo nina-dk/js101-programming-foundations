@@ -1,0 +1,26 @@
+
+{ 
+    "english": {
+      "welcome": "Welcome to Calculator!",
+      "num1": "What's the first number? ",
+      "num2": "What's the second number? ",
+      "validNumber" : "Hmm... that doesn't look like a valid number.",
+      "operation": "What operation would you like to perform?\n1) Add, 2) Subtract, 3) Multiply, 4) Divide",
+      "validOp": "You must choose 1, 2, 3 or 4.",
+      "zeroDivision": "You can't divide a number by zero.",
+      "result": "The result is: ",
+      "answer": ["Do you want to perform another calculation? yes/no", "yes", "no"]
+    },
+    "greek": {
+      "welcome": "Καλώς ήρθατε στην Αριθμομηχανή!",
+      "num1": "Ποιος είναι ο πρώτος αριθμός; ",
+      "num2": "Ποιος είναι ο δεύτερος αριθμός; ",
+      "validNumber" : "Χμμ.. Αυτός δεν φαίνεται να είναι ένας έγκυρος αριθμός.",
+      "operation": "Τι πράξη θέλετε να κάνετε;\n1) Πρόσθεση, 2) Αφαίρεση, 3) Πολλαπλασιασμό, 4) Διαίρεση",
+      "validOp": "Πρέπει να επιλέξετε μεταξύ 1, 2, 3 ή 4.",
+      "zeroDivision": "Δεν μπορείτε να διαιρέσετε έναν αριθμό με το 0.",
+      "result": "Το αποτέλεσμα είναι: ",
+      "answer": ["Θέλετε να κάνετε άλλη πράξη; ναι/όχι", "ναι", "όχι"]
+  }
+
+}
