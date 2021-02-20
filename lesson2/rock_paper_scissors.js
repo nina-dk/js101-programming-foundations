@@ -37,25 +37,28 @@ function incrementWins(userChoice, pcChoice) {
   }
 }
 
-//Object solution
+//Object solution with seven gestures
+//(just to demonstrate, not in use in the current program)
 
 const WINNING_COMBOS = {
-  rock: ["scissors", "lizard"],
-  scissors: ["paper", "lizard"],
-  paper: ["rock", "spock"],
-  lizard: ["paper", "spock"],
-  spock: ["scissors", "rock"]
+  rock: ["scissors", "sponge", "fire"],
+  scissors: ["paper", "air", "sponge"],
+  paper: ["rock", "air", "water"],
+  fire: ["paper", "scissors", "sponge"],
+  air: ["water", "rock", "fire"],
+  water: ["fire", "scissors", "rock"],
+  sponge: ["water", "air", "paper"]
 };
 
-function whoWins(firstPlayerChoice, secondPlayerChoice) {
+// eslint-disable-next-line no-unused-vars
+function whoWon(firstPlayerChoice, secondPlayerChoice) {
   return WINNING_COMBOS[firstPlayerChoice].includes(secondPlayerChoice);
 }
 
 
 //Without using the object solution
 
-// eslint-disable-next-line no-unused-vars
-function whoWon(userChoice, pcChoice) {
+function whoWins(userChoice, pcChoice) {
   return ((userChoice === "rock" && (pcChoice === "scissors" || pcChoice === "lizard")) ||
   (userChoice === "scissors" && (pcChoice === "paper" || pcChoice === "lizard")) ||
   (userChoice === "paper" && (pcChoice === "rock" || pcChoice === "spock")) ||
