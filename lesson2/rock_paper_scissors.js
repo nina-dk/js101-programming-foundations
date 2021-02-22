@@ -1,12 +1,3 @@
-//Find grand winner
-//START
-//SET userWins = 0 and computerWins = 0;
-//WHILE userWins and computerWins are < 5
-//  IF user wins, increment userWins
-//  ELSE increment computerWins
-//PRINT grandWinner
-//END
-
 const rlSync = require("readline-sync");
 const VALID_CHOICES = ["rock", "paper", "scissors", "fire", "air", "water", "sponge"];
 const WINNING_SCORE = 5;
