@@ -8,18 +8,41 @@
 //END
 
 const rlSync = require("readline-sync");
-const VALID_CHOICES = ["rock", "paper", "scissors", "lizard", "spock"];
+const VALID_CHOICES = ["rock", "paper", "scissors", "fire", "air", "water", "sponge"];
+const WINNING_SCORE = 5;
+const OPTIONS_MSG = `Type
+   r to choose rock,
+   p for paper,
+   sc for scissors,
+   f for fire,
+   a for air,
+   w for water,
+   sp for sponge.`;
 const prompt = message => console.log(`=> ${message}`);
 let userWins = 0;
 let computerWins = 0;
+
+function getUserChoice() {
+  let userChoice = rlSync.question(prompt(OPTIONS_MSG)).toLowerCase().trim();
+  userChoice = matchUserChoice(userChoice);
+  while (!VALID_CHOICES.includes(userChoice)) {
+    prompt("That's not a valid choice. Please try again:");
+    userChoice = rlSync.question().toLowerCase();
+    userChoice = matchUserChoice(userChoice);
+  }
+
+  return userChoice;
+}
 
 function matchUserChoice(userInput) {
   switch (userInput) {
     case "r": return "rock";
     case "p": return "paper";
     case "sc": return "scissors";
-    case "l": return "lizard";
-    case "sp": return "spock";
+    case "f": return "fire";
+    case "a": return "air";
+    case "w": return "water";
+    case "sp": return "sponge";
   }
   return undefined;
 }
@@ -30,15 +53,14 @@ function clearOrGreet(answer) {
 }
 
 function incrementWins(userChoice, pcChoice) {
-  if (whoWins(userChoice, pcChoice) && userWins < 5) {
+  if (whoWins(userChoice, pcChoice) && userWins < WINNING_SCORE) {
     userWins += 1;
-  } else if (whoWins(pcChoice, userChoice) && computerWins < 5) {
+  } else if (whoWins(pcChoice, userChoice) && computerWins < WINNING_SCORE) {
     computerWins += 1;
   }
 }
 
 //Object solution with seven gestures
-//(just to demonstrate, not in use in the current program)
 
 const WINNING_COMBOS = {
   rock: ["scissors", "sponge", "fire"],
@@ -50,51 +72,29 @@ const WINNING_COMBOS = {
   sponge: ["water", "air", "paper"]
 };
 
-// eslint-disable-next-line no-unused-vars
-function whoWon(firstPlayerChoice, secondPlayerChoice) {
+function whoWins(firstPlayerChoice, secondPlayerChoice) {
   return WINNING_COMBOS[firstPlayerChoice].includes(secondPlayerChoice);
 }
-
-
-//Without using the object solution
-
-function whoWins(userChoice, pcChoice) {
-  return ((userChoice === "rock" && (pcChoice === "scissors" || pcChoice === "lizard")) ||
-  (userChoice === "scissors" && (pcChoice === "paper" || pcChoice === "lizard")) ||
-  (userChoice === "paper" && (pcChoice === "rock" || pcChoice === "spock")) ||
-  (userChoice === "lizard" && (pcChoice === "paper" || pcChoice === "spock")) ||
-  (userChoice === "spock" && (pcChoice === "scissors" || pcChoice === "rock")));
-}
-
 
 function displayWinner(userChoice, pcChoice) {
   if (whoWins(userChoice, pcChoice)) {
     prompt("You win!");
-    // incrementWins("user");
   } else if (userChoice === pcChoice) {
     prompt("It's a tie!");
   } else {
     prompt("The computer wins!");
-    // incrementWins("computer");
   }
 }
 
 function displayGrandWinner() {
-  prompt(userWins === 5 ? "You are the Grand Winner!" : "The computer is the Grand Winner!");
+  prompt(userWins === WINNING_SCORE ? "You are the Grand Winner!" : "The computer is the Grand Winner!");
 }
 
-prompt(`Welcome to Rock, Paper, Scissors, Spock, Lizard!
-   He who wins 5 times first becomes the Grand Winner!`);
+prompt(`Welcome to Rock, Paper, Scissors, Fire, Air, Water, Sponge!
+   He who wins ${WINNING_SCORE} times first becomes the Grand Winner!`);
 let playAgain = "yes";
 while (playAgain[0] === "y") {
-  let choice = rlSync.question(prompt(`Type r to choose rock, p for paper, sc for scissors, l for lizard and sp for spock.`))
-    .toLowerCase().trim();
-  choice = matchUserChoice(choice);
-  while (!VALID_CHOICES.includes(choice)) {
-    prompt("That's not a valid choice. Please try again:");
-    choice = rlSync.question().toLowerCase();
-    choice = matchUserChoice(choice);
-  }
+  let choice = getUserChoice();
 
   let randomIndex = Math.floor(Math.random() * VALID_CHOICES.length);
   /* Alternative solutions using Math.round() and Math.ceil()
@@ -109,8 +109,9 @@ while (playAgain[0] === "y") {
   prompt(`You chose ${choice} and the computer chose ${computerChoice}.`);
   displayWinner(choice, computerChoice);
   incrementWins(choice, computerChoice);
+  prompt(`Your score: ${userWins} --- Computer score: ${computerWins}`);
 
-  if (userWins < 5 && computerWins < 5) {
+  if (userWins < WINNING_SCORE && computerWins < WINNING_SCORE) {
     playAgain = rlSync.question("Do you want to play again? yes/no\n").toLowerCase();
     while (!["n", "y"].includes(playAgain[0])) {
       prompt("Please enter yes or no.");
