@@ -47,11 +47,13 @@ function initializeBoard() {
   }, {});
 }
 
-// eslint-disable-next-line max-statements
-function displayBoard(board, userWins, computerWins) {
+function displayInfo(userWins, computerWins) {
   console.clear();
   prompt(`Your marker is ${USER_MARKER} and the computer's marker is ${COMPUTER_MARKER}.`);
-  console.log(`---Current Score---\nYou: ${userWins}, Computer: ${computerWins}`);
+  console.log(`---Current Score---\nYou: ${userWins || 0}, Computer: ${computerWins || 0}`);
+}
+
+function displayBoard(board) {
   console.log('');
   console.log('     |     |');
   console.log(`  ${board['1']}  |  ${board['2']}  |  ${board['3']}`);
@@ -67,8 +69,33 @@ function displayBoard(board, userWins, computerWins) {
   console.log('');
 }
 
+function showcaseNumbering() {
+  let board = initializeBoard();
+
+  for (let square in board) {
+    board[square] = square;
+  }
+
+  prompt("Numbering of the squares goes as follows:");
+  displayBoard(board);
+}
+
 function getEmptySquares(board) {
   return Object.keys(board).filter(key => board[key] === INITIAL_MARKER);
+}
+
+function whoPlays(turn) {
+  if (turn === "choose") {
+    turn = rlSync.question(prompt("Who shall play first: (p)layer or (c)omputer?")).toLowerCase();
+    while (!["player", "computer", "p", "c"].includes(turn)) {
+      turn = rlSync.question(prompt("Please choose between player and computer.")).toLowerCase();
+    }
+  }
+
+  if (turn === "p") turn = "player";
+  if (turn === "c") turn = "computer";
+
+  return turn;
 }
 
 function userPlays(board) {
@@ -82,8 +109,15 @@ function userPlays(board) {
   board[move] = USER_MARKER;
 }
 
+function chooseSquare(board, currentPlayer) {
+  if (currentPlayer === "player") userPlays(board);
+  else computerPlays(board);
+}
+
+const alternatePlayer = currentPlayer => (currentPlayer === "player" ? "computer" : "player");
+
 // eslint-disable-next-line max-lines-per-function
-function pickSquareForComputer(board, emptySquares) {
+function computerSmartPick(board, emptySquares) {
   let combosWithEmptySquares = [];
 
   for (let i = 0; i < emptySquares.length; i++) {
@@ -102,14 +136,14 @@ function pickSquareForComputer(board, emptySquares) {
     }
   }
 
-  let combosToPlay = combosWithEmptySquares.filter(combo => {
+  let smartCombos = combosWithEmptySquares.filter(combo => {
     return (combo.some(num => board[num] === COMPUTER_MARKER) &&
       !combo.some(num => board[num] === USER_MARKER));
   });
 
-  if (combosToPlay.length > 0) {
-    let randomIndex = Math.floor(Math.random() * combosToPlay.length);
-    return combosToPlay[randomIndex].find(num => {
+  if (smartCombos.length > 0) {
+    let randomIndex = Math.floor(Math.random() * smartCombos.length);
+    return smartCombos[randomIndex].find(num => {
       return emptySquares.includes(String(num));
     });
   }
@@ -139,28 +173,33 @@ function riskyOrWinningSquare(board, emptySquares, marker) {
 
 function computerPlays(board) {
   let emptySquares = getEmptySquares(board);
-  let winningSquare = riskyOrWinningSquare(board, emptySquares, COMPUTER_MARKER);
-  let riskySquare = riskyOrWinningSquare(board, emptySquares, USER_MARKER);
+  let computerSquare = riskyOrWinningSquare(board, emptySquares, COMPUTER_MARKER);
 
-  if (winningSquare) board[winningSquare] = COMPUTER_MARKER;
-  else if (riskySquare) board[riskySquare] = COMPUTER_MARKER;
-  else if (emptySquares.includes("5")) board[5] = COMPUTER_MARKER;
-  else if (pickSquareForComputer(board, emptySquares)) {
-    board[pickSquareForComputer(board, emptySquares)] = COMPUTER_MARKER;
-  } else {
-    let randomIndex = Math.floor(Math.random() * emptySquares.length);
-    board[emptySquares[randomIndex]] = COMPUTER_MARKER;
+  if (!computerSquare) {
+    computerSquare = riskyOrWinningSquare(board, emptySquares, USER_MARKER);
   }
+  if (!computerSquare && emptySquares.includes("5")) computerSquare = 5;
+  else if (!computerSquare) {
+    computerSquare = computerSmartPick(board, emptySquares);
+  }
+  if (!computerSquare) {
+    let randomIndex = Math.floor(Math.random() * emptySquares.length);
+    computerSquare = emptySquares[randomIndex];
+  }
+
+  board[computerSquare] = COMPUTER_MARKER;
 }
 
-function chooseSquare(board, currentPlayer) {
-  // eslint-disable-next-line no-unused-expressions
-  currentPlayer === "player" ? userPlays(board) : computerPlays(board);
+function askToPlayAgain() {
+  let playAgain = rlSync.question(prompt("Want a rematch? (yes/no)")).toLowerCase();
+  while (!["yes", "no"].includes(playAgain)) {
+    playAgain = rlSync.question(prompt('Please answer with "yes" or "no".')).toLowerCase();
+  }
+
+  return playAgain;
 }
 
-const alternatePlayer = currentPlayer => (currentPlayer === "player" ? "computer" : "player");
-
-function displayWinner(board) {
+function someoneWon(board) {
   for (let i = 0; i < WINNING_COMBOS.length; i++) {
     let marker = board[WINNING_COMBOS[i][0]];
     if (marker === INITIAL_MARKER) continue;
@@ -169,48 +208,57 @@ function displayWinner(board) {
   return false;
 }
 
-console.clear();
-prompt("Welcome to Tic Tac Toe!");
-prompt("The first to win 5 times will be crowned GRAND WINNER!");
-let playAgain = "yes";
-
-while (playAgain === "yes") {
-  let [userWins, computerWins] = [0, 0];
-  let turn = whoPlaysFirst[0];
-
-  if (turn === "choose") {
-    turn = rlSync.question(prompt("Who shall play first: player or computer?")).toLowerCase();
-    while (!["player", "computer"].includes(turn)) {
-      turn = rlSync.question(prompt("Please choose between player and computer.")).toLowerCase();
-    }
+function playSingleRound(board, currentPlayer, userWins, computerWins) {
+  while (true) {
+    displayInfo(userWins, computerWins);
+    displayBoard(board);
+    chooseSquare(board, currentPlayer);
+    currentPlayer = alternatePlayer(currentPlayer);
+    if (someoneWon(board) || getEmptySquares(board).length === 0) break;
   }
+}
+
+
+// eslint-disable-next-line max-lines-per-function
+function playFullMatch() {
+  let [userWins, computerWins] = [0, 0];
+  let turn = whoPlays(whoPlaysFirst[0]);
 
   while (userWins < WINNING_SCORE && computerWins < WINNING_SCORE) {
-    let moves = initializeBoard();
+    let board = initializeBoard();
 
-    while (true) {
-      displayBoard(moves, userWins, computerWins);
-      chooseSquare(moves, turn);
-      turn = alternatePlayer(turn);
-      if (displayWinner(moves) || getEmptySquares(moves).length === 0) break;
-    }
+    playSingleRound(board, turn, userWins, computerWins);
+    turn = alternatePlayer(turn);
 
-    if (displayWinner(moves)) {
-      if (displayWinner(moves) === USER_MARKER) {
-        userWins += 1;
-      } else {
-        computerWins += 1;
-      }
-    }
+    displayInfo(userWins, computerWins);
+    displayBoard(board);
+
+    if (someoneWon(board) === USER_MARKER) {
+      userWins += 1;
+      prompt("You won this round!");
+    } else if (someoneWon(board) === COMPUTER_MARKER) {
+      computerWins += 1;
+      prompt("Computer won this round!");
+    } else prompt("It's a tie!");
+
+    rlSync.question(prompt("Press Enter/Return to continue."));
   }
 
   if (userWins === WINNING_SCORE) prompt("You're the GRAND WINNER!");
   else if (computerWins === WINNING_SCORE) prompt("The computer is the GRAND WINNER!");
-
-  playAgain = rlSync.question(prompt("Want a rematch? (yes/no)")).toLowerCase();
-  while (!["yes", "no"].includes(playAgain)) {
-    playAgain = rlSync.question(prompt('Please answer with "yes" or "no".\n')).toLowerCase();
-  }
 }
+
+console.clear();
+console.log("\n");
+prompt("Welcome to Tic Tac Toe!\n");
+prompt("The first to win 5 times will be crowned GRAND WINNER!");
+showcaseNumbering();
+let playAgain = "yes";
+
+do {
+  playFullMatch();
+  playAgain = askToPlayAgain();
+
+} while (playAgain === "yes");
 
 prompt("Goodbye!");
