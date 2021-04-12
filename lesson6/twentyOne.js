@@ -193,6 +193,7 @@ function playSingleRound(playerWins, dealerWins) {
 
   if (!busted(dealerTotal) && !busted(playerTotal)) prompt(`Dealer stayed at ${dealerTotal}.\n`);
 
+  // eslint-disable-next-line max-len
   [playerWins, dealerWins] = getWins(playerTotal, dealerTotal, playerWins, dealerWins);
   displayFinalHands(playerCards, dealerCards);
   displayResult(playerTotal, dealerTotal, playerWins, dealerWins);
