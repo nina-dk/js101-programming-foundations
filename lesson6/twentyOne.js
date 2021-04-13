@@ -193,8 +193,8 @@ function playSingleRound(playerWins, dealerWins) {
 
   if (!busted(dealerTotal) && !busted(playerTotal)) prompt(`Dealer stayed at ${dealerTotal}.\n`);
 
-  // eslint-disable-next-line max-len
-  [playerWins, dealerWins] = getWins(playerTotal, dealerTotal, playerWins, dealerWins);
+  [playerWins, dealerWins] = getWins(playerTotal,
+    dealerTotal, playerWins, dealerWins);
   displayFinalHands(playerCards, dealerCards);
   displayResult(playerTotal, dealerTotal, playerWins, dealerWins);
 
@@ -203,6 +203,7 @@ function playSingleRound(playerWins, dealerWins) {
 
 console.clear();
 decorateMsg("Welcome to another game of Twenty One!");
+console.log("\n   Win 5 times to become the GRAND WINNER!\n");
 
 while (true) {
   let [playerWins, dealerWins] = [0, 0];
